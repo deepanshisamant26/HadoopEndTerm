@@ -1,1 +1,39 @@
+import java.io.IOException;
+
+// file system 
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+
+// box classes import 
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+
+// mapreduce imports
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class SumDriver {
+	public static void main(String[] args) throws Exception {
+		Configuration conf = new Configuration();
+		String[] otherArgs = new GenericOptionsParser(conf, args)
+				.getRemainingArgs();
+		if (otherArgs.length != 2) {
+			System.err.println("Usage: numbersum <in> <out>");
+			System.exit(2);
+		}
+		 long startTime = System.currentTimeMillis();//Calculate time
+		Job job = new Job(conf);
+		job.setJarByClass(Prime.class);
+		job.setMapperClass(SumMapper.class);
+		job.setReducerClass(SumReducer.class);
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(LongWritable.class);
+		FileInputFormat.addInputPath(job, new Path(otherArgs[0]));
+		FileOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
+		job.waitForCompletion(true);
+		long endTime = System.currentTimeMillis();
+		System.out.println("time=" + (endTime - startTime));
+		System.exit(0);
+	}
 
